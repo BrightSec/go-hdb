@@ -26,6 +26,9 @@ func (p *OutputParameters) decodeResult(dec *encoding.Decoder, header *PartHeade
 	}
 
 	n := numArg * cols
+	if err := checkCount(dec, n, 1); err != nil { // each value takes at least one byte
+		return err
+	}
 	p.FieldValues = slices.Grow(p.FieldValues, n)[:n]
 
 	for i := range numArg {

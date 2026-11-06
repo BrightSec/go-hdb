@@ -141,6 +141,9 @@ func (r *ResultMetadata) String() string {
 }
 
 func (r *ResultMetadata) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
+	if err := checkCount(dec, header.numArg(), 24); err != nil { // each field takes 24 bytes
+		return err
+	}
 	r.ResultFields = newResultFields(header.numArg())
 	names := &fieldNames{}
 	for i := range len(r.ResultFields) {

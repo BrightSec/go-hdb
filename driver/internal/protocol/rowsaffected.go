@@ -25,6 +25,9 @@ func (r RowsAffected) String() string {
 
 func (r *RowsAffected) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
 	numArg := header.numArg()
+	if numArg < 0 || numArg > header.bufLen()/4 { // each entry is an int32
+		return errShortRead
+	}
 	r.rows = slices.Grow(r.rows, numArg)[:numArg]
 
 	for i := range numArg {

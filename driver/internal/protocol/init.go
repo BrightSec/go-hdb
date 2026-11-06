@@ -62,7 +62,7 @@ func (r *initRequest) decode(dec *encoding.Decoder) error {
 
 	switch r.numOptions {
 	default:
-		panic("invalid number of options")
+		return fmt.Errorf("invalid number of options %d", r.numOptions)
 
 	case 0:
 		dec.Skip(2)
@@ -70,7 +70,7 @@ func (r *initRequest) decode(dec *encoding.Decoder) error {
 	case 1:
 		cnt := dec.Int8()
 		if cnt != 1 {
-			panic("invalid number of options - 1 expected")
+			return fmt.Errorf("invalid number of options %d - 1 expected", cnt)
 		}
 		r.endianness = endianness(dec.Int8())
 	}
