@@ -373,6 +373,10 @@ func (r *Reader) Parts(ctx context.Context) iter.Seq2[*PartInfo, error] {
 				if ph.bufferLength < 0 {
 					panic(fmt.Sprintf("corrupt frame: part bufferLength %d", ph.bufferLength))
 				}
+				if ph.numArg() < 0 {
+					yield(nil, fmt.Errorf("part header: invalid argument count %d", ph.numArg()))
+					return
+				}
 				if j != lastPart {
 					bufAdvance += padBytes(int(ph.bufferLength))
 				}

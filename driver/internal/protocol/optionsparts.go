@@ -692,14 +692,19 @@ func (ops *options[K]) set(k K, v any) {
 func (ops options[K]) numArg() int { return len(ops) }
 
 func (ops *options[K]) decode(dec *encoding.Decoder, numArg int) error {
-	*ops = slices.Grow((*ops)[:0], numArg) // reuse backing array, sized upfront
+	if numArg < 0 {
+		return fmt.Errorf("invalid number of options %d", numArg)
+	}
+	// reuse backing array, sized upfront (each option needs at least 3 bytes)
+	*ops = slices.Grow((*ops)[:0], min(numArg, len(dec.Buffer())/3))
 	for range numArg {
 		k := K(dec.Int8())
 
 		// set (not raw append) so a repeated key overwrites: last-wins,
 		// as the former map-backed options did. Conformant replies never
 		// repeat a key, so this is the compact single-entry case.
-		switch typeCode(dec.Byte()) {
+		tc := typeCode(dec.Byte())
+		switch tc {
 		case tcBoolean:
 			ops.set(k, dec.Bool())
 		case tcTinyint:
@@ -717,7 +722,7 @@ func (ops *options[K]) decode(dec *encoding.Decoder, numArg int) error {
 			size := int(dec.Int16())
 			ops.set(k, dec.Bytes(size))
 		default:
-			panic("unknown option typeCode") // should never happen
+			return fmt.Errorf("unknown option typeCode %d", tc)
 		}
 	}
 	return nil

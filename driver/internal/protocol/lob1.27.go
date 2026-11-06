@@ -104,7 +104,7 @@ func (r *ReadLobReply) Bytes(tr transform.Transformer) ([]byte, int, error) {
 
 func (r *ReadLobReply) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
 	if header.numArg() != 1 {
-		panic("numArg == 1 expected")
+		return fmt.Errorf("invalid number of arguments %d - 1 expected", header.numArg())
 	}
 	id := LocatorID(dec.Uint64())
 	if id != r.id {
