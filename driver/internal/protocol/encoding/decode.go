@@ -75,7 +75,7 @@ func (d *Decoder) Byte() byte {
 // Bytes decodes bytes.
 func (d *Decoder) Bytes(n int) []byte {
 	if n < 0 {
-		panic(fmt.Sprintf("corrupt frame: negative field length %d", n))
+		panic(ShortBufferError{Need: n, Have: len(d.buf)})
 	}
 	if len(d.buf) < n {
 		panic(ShortBufferError{Need: n, Have: len(d.buf)})
@@ -88,7 +88,7 @@ func (d *Decoder) Bytes(n int) []byte {
 // Str decodes strings.
 func (d *Decoder) Str(n int) string {
 	if n < 0 {
-		panic(fmt.Sprintf("corrupt frame: negative field length %d", n))
+		panic(ShortBufferError{Need: n, Have: len(d.buf)})
 	}
 	if len(d.buf) < n {
 		panic(ShortBufferError{Need: n, Have: len(d.buf)})
