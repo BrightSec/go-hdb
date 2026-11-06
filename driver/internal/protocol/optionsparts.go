@@ -516,6 +516,9 @@ func (ti TopologyInformation) String() string { return fmt.Sprintf("%v", ti.node
 
 func (ti *TopologyInformation) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
 	numArg := header.numArg()
+	if err := checkCount(dec, numArg, 2); err != nil { // each node starts with a 2 byte option count
+		return err
+	}
 
 	ti.nodes = slices.Grow(ti.nodes, numArg)[:numArg]
 	for i := range numArg {

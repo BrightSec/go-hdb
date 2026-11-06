@@ -261,6 +261,9 @@ func (m *ParameterMetadata) String() string {
 }
 
 func (m *ParameterMetadata) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
+	if err := checkCount(dec, header.numArg(), 16); err != nil { // each field takes 16 bytes
+		return err
+	}
 	m.ParameterFields = make([]*ParameterField, header.numArg())
 	names := &fieldNames{}
 	for i := range len(m.ParameterFields) {
@@ -315,6 +318,9 @@ func (p *InputParameters) decode(dec *encoding.Decoder, header *PartHeader, attr
 	}
 
 	n := numRows * numColumns
+	if err := checkCount(dec, n, 1); err != nil { // each value takes at least one byte
+		return err
+	}
 	p.FieldValues = slices.Grow(p.FieldValues, n)[:0]
 
 	for range numRows {

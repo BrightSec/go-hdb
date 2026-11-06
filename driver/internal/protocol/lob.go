@@ -195,6 +195,9 @@ func (r *WriteLobRequest) numArg() int { return len(r.Descrs) }
 // sniffer.
 func (r *WriteLobRequest) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
 	numArg := header.numArg()
+	if err := checkCount(dec, numArg, 21); err != nil { // each descriptor takes at least 21 bytes
+		return err
+	}
 
 	r.Descrs = make([]*WriteLobDescr, numArg)
 	for i := range numArg {
@@ -226,6 +229,9 @@ func (r *WriteLobReply) String() string { return fmt.Sprintf("ids %v", r.IDs) }
 
 func (r *WriteLobReply) decode(dec *encoding.Decoder, header *PartHeader, attrs *ReaderAttrs) error {
 	numArg := header.numArg()
+	if err := checkCount(dec, numArg, 8); err != nil { // each id takes 8 bytes
+		return err
+	}
 
 	r.IDs = slices.Grow(r.IDs, numArg)[:numArg]
 

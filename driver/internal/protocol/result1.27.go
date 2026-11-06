@@ -25,6 +25,9 @@ func (r *Resultset) decodeResult(dec *encoding.Decoder, header *PartHeader, attr
 		return fmt.Errorf("result set too large: %d rows x %d cols", numArg, cols)
 	}
 	n := numArg * cols
+	if err := checkCount(dec, n, 1); err != nil { // each value takes at least one byte
+		return err
+	}
 	r.FieldValues = slices.Grow(r.FieldValues, n)[:n]
 
 	for i := range numArg {

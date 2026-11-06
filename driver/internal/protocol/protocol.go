@@ -37,6 +37,17 @@ func recoverShortBuffer(errp *error) {
 	}
 }
 
+// checkCount verifies that the decoder's remaining buffer can hold at least
+// minSize bytes for each of cnt entries. A part header's argument count is
+// untrusted, so it must be bounded by the payload before it is used to size an
+// allocation or drive a decode loop.
+func checkCount(dec *encoding.Decoder, cnt, minSize int) error {
+	if cnt < 0 || (minSize > 0 && cnt > len(dec.Buffer())/minSize) {
+		return fmt.Errorf("argument count %d exceeds payload of %d bytes: %w", cnt, len(dec.Buffer()), errShortRead)
+	}
+	return nil
+}
+
 const (
 	traceMsg = "PROT"
 
