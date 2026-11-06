@@ -43,18 +43,25 @@ const (
 // AuthVarFieldInd decodes an auth variable field indicator.
 func (d *Decoder) AuthVarFieldInd() int {
 	b := d.Byte()
+	var n int
 	switch {
 	case b <= authFieldLenInd1Byte:
 		return int(b)
 	case b == authFieldLenInd2Byte:
-		return int(d.Int16())
+		n = int(d.Int16())
 	case b == authFieldLenIndBE:
 		return int(d.Uint16ByteOrder(binary.BigEndian))
 	case b == authFieldLenInd4Byte:
-		return int(d.Int32())
+		n = int(d.Int32())
 	default:
 		return int(b) // 248..254 one byte length
 	}
+	if n < 0 {
+		// a negative length is invalid: report it as a short buffer so that
+		// part decoders fail with an error instead of a panic.
+		panic(ShortBufferError{Need: n, Have: len(d.buf)})
+	}
+	return n
 }
 
 // AuthBytes decodes an auth variable bytes field.
